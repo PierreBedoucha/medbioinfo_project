@@ -41,65 +41,33 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import roc_curve
 
-pred_save = []
-true_save = []
-pred_prob_save = []
+from keras.models import Sequential
+from keras.layers import Dense
 
-clf = RandomForestClassifier(n_estimators=100, max_depth=20, min_samples_split=5, min_samples_leaf=2, random_state=None, verbose=0)
+def plot_loss_acc(history):
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train acc', 'val acc', 'train loss', 'val loss'], loc='upper left')
+    plt.show()
 
-for i, (train_index, val_index) in enumerate(cv.split(), 1):
-    print("Set: ", i)
-    print("Training on", len(train_index), "examples")
-    print("Testing on", len(val_index), "examples")
-    (X_train, X_val) = X[train_index, :], X[val_index, :]
-    (Y_train, Y_val) = Y[train_index], Y[val_index]
+model = Sequential()
 
-    clf = clf.fit(X_train, Y_train)
+model.add(Dense(units=3, activation='tanh', input_dim=13))
+model.add(Dense(units=3, activation='tanh', input_dim=13))
+model.add(Dense(units=3, activation='tanh', input_dim=13))
+model.add(Dense(units=3, activation='tanh', input_dim=13))
+model.add(Dense(units=2, activation='softmax'))
 
-    # Predict on the training data
-    pred = clf.predict(X_train)
-    # Calculate performance measures on the validation data
-    acc_train = accuracy_score(pred, Y_train)
-    mcc_train = matthews_corrcoef(pred, Y_train)
-    f1_train = f1_score(pred, Y_train)
+model.compile(optimizer='rmsprop',                    #adaptive learning rate method
+              loss='sparse_categorical_crossentropy', #loss function for classification problems with integer labels
+              metrics=['accuracy'])                   #the metric doesn't influence the training
 
-    # Predict on the validation data
-    val_pred = clf.predict(X_val)
-    # Predict the probability (to use the roc-plot later)
-    val_pred_prob = val_pred
+hist = model.fit(X, Y, epochs=10, batch_size=32, validation_split=0.2)
 
-    # Save the values to have predictions for all folds.
-    pred_save.append(val_pred)
-    pred_prob_save.append(val_pred_prob)
-    true_save.append(Y_val)
-    # Calculate performance measures on the validation data
-    acc = accuracy_score(val_pred, Y_val)
-    mcc = matthews_corrcoef(val_pred, Y_val)
-    f1 = f1_score(val_pred, Y_val)
-
-    print("Training performance", "f1", f1_train, "acc", acc_train, "mcc", mcc_train)
-    print("Validation performance", "f1", f1, "acc", acc, "mcc", mcc)
-    print("==============")
-
-# Calculate overall validation performance
-predictions = np.concatenate(pred_save)
-correct = np.concatenate(true_save)
-predicted_prob = np.concatenate(pred_prob_save)
-acc = accuracy_score(predictions, correct)
-mcc = matthews_corrcoef(predictions, correct)
-f1 = f1_score(predictions, correct)
-print("==============")
-print("Overall Validation Performance", "f1", f1, "acc", acc, "mcc", mcc)
-print("==============")
-
-pred_save=np.concatenate(pred_save)
-true_save=np.concatenate(true_save)
-pred_prob_save=np.concatenate(pred_prob_save)
-(fpr, tpr, thres_roc) = roc_curve(true_save, pred_prob_save)
-plt.plot(fpr, tpr)
-plt.title('ROC curve')
-plt.xlabel('fpr')
-plt.ylabel('tpr')
-
-plt.show()
+plot_loss_acc(hist)
 
