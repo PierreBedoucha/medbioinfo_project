@@ -1,6 +1,6 @@
 # medbioinfo_project
 
-Project
+## Project
 
 The project is the examining part of the course. Together with participation at the workshop it is compulsory to gain the course credits. The workload is expected to be about a week. The project is your chance to learn a bit more about some particular ML methods. The project consists of applying some ML metods to a particular dataset or datasets, and the compare the results. The results should be compiled in a written report including:
 
@@ -21,3 +21,10 @@ For example:
     Mice Protein Expression Data Set
 
 Upload a pdf of your report as answer to the Project assignment in canvas
+
+## Conclusions
+
+After running ```jupyter notebook ML\ Medbioinfo\ Project.ipynb```
+and going through the project outline the drawn conclusions were the following:
+- The set is heavily biased on incorrect protein models, with many rows with zero in the DockQ-binary column. This certainly influence the result if we choose total accuracy since predicting all zeros will give a too high accuracy. It would be maybe better then to focus on precision and recall which only considers positive predictions.
+- For the hyperparameters, we want to have the optimium value inside the searched grid, and not at the border. If the optimum is at the border, it would be better to go higher or lower to establish a maximum. Here the metric used for this analysis was accuracy.
